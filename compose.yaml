@@ -14,9 +14,9 @@ services:
         condition: service_healthy
     volumes:
       # custom configurations
-      - ~/umbrel/affine/self-host/config:/root/.affine/config
+      - affine-config:/root/.affine/config
       # blob storage
-      - ~/umbrel/affine/self-host/storage:/root/.affine/storage
+      - affine-storage:/root/.affine/storage
     logging:
       driver: 'json-file'
       options:
@@ -36,7 +36,7 @@ services:
     container_name: affine_redis
     restart: unless-stopped
     volumes:
-      - ~/umbrel/affine/self-host/redis:/data
+      - affine-redis:/data
     healthcheck:
       test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
       interval: 10s
@@ -47,7 +47,7 @@ services:
     container_name: affine_postgres
     restart: unless-stopped
     volumes:
-      - ~/umbrel/affine/self-host/postgres:/var/lib/postgresql/data
+      - affine-postgres:/var/lib/postgresql/data
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U affine']
       interval: 10s
@@ -66,19 +66,8 @@ services:
       - postgres
     ports:
       - 3011:8080
-  backup_bot:
-    build: https://github.com/Radim296/pg-backup-bot.git
-    depends_on:
-      - postgres
-    environment:
-      - POSTGRES_DB=affine
-      - POSTGRES_USER=affine
-      - POSTGRES_PASSWORD=affine
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - CHAT_ID=154917313
-      - TELEGRAM_TOKEN=7705866863:AAHqrVp2Bj2_9LVKxRrCvTLdZls8VnvVlIo
-
-      # configuring the time (you can set one of the following options)
-      # - TIME_TO_SEND=21:00 # hour:minute in 24h format
-      - INTERVAL=2 # minutes
+volumes:
+  affine-config:
+  affine-storage:
+  affine-redis:
+  affine-postgres:
